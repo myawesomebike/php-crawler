@@ -1,0 +1,93 @@
+<html>
+<head>
+<title>Website Crawler</title>
+<link type="text/css" rel="stylesheet" href="/crawler/crawlerstyles.css" />
+<script>
+var t;
+function ajax(getURL,parameters,callback) { //handles AJAX requests
+	//if(ge('ajaxWait')) { ge('ajaxWait').style.display = "block"; } //Show spinny wait thing
+	if (window.XMLHttpRequest) { var asyncXmlhttp=new XMLHttpRequest(); } //Real browsers
+	else { var asyncXmlhttp=new ActiveXObject("Microsoft.XMLHTTP"); } //IE
+	asyncXmlhttp.onreadystatechange=function() {
+		if (asyncXmlhttp.readyState==4 && asyncXmlhttp.status==200) {
+			//if(ge('ajaxWait')) { ge('ajaxWait').style.display = "none"; } //Hide spinny wait thing
+			callback(asyncXmlhttp.responseText); //process AJAX results
+		}
+	}
+	if (parameters!="") {
+		asyncXmlhttp.open("POST",getURL,true);
+		asyncXmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		asyncXmlhttp.send(parameters);
+	}
+	else {
+		asyncXmlhttp.open("GET",getURL,true);
+		asyncXmlhttp.send();
+	}
+}
+function ge(obj) {
+	return document.getElementById(obj);
+}
+function refresh(rFunction,rDest,rData) {
+	backend(rFunction,rDest,rData)
+	t = window.setInterval("refresh("+rFunction+","+rDest+","+rData+")", 500);
+}
+function stopRefresh() {
+	t = window.clearInterval(t);
+}
+function backend(rFunction,rDest,rData) {
+	if(arguments.length > 3) {
+		getURL = "be.php?rf=" + rFunction;
+		for(i = 2; i<arguments.length; i++) {
+			getURL = getURL + "&rd[]="+arguments[i];
+		}
+	}
+	else {
+		getURL = "be.php?rf=" + rFunction + "&rd[]=" + rData;
+	}
+	callback = function(response) {
+		ge(rDest).innerHTML = response;
+		ge(rDest).style.opacity = "1";
+	}
+	ajax(getURL,"",callback);
+	ge(rDest).style.opacity = "0.5";
+}
+function createModal(fromURL) {
+	ge("ajaxLoader").innerHTML = '<img src="images/close.png" style="position:absolute; top:-8px; left:-8px; cursor:pointer;" onclick="closeModal();"><img src="/images/287.gif" style="height:64px; width:64px;">';
+	callback = function(response) {
+		ge("ajaxLoader").innerHTML = '<img src="images/close.png" style="position:absolute; top:-8px; left:-8px; cursor:pointer; z-index:90000;" onclick="closeModal();">'+response;
+	}
+	ajax(fromURL,"",callback);
+
+	ge("ajaxModal").style.display = "block";
+}
+function closeModal() {
+	ge("ajaxLoader").innerHTML = "";
+	ge("ajaxModal").style.display = "none";
+}
+</script>
+</head>
+<body onload="backend('buildDomains','domainTarget','');">
+<div id="ajaxModal"><div id="ajaxLoader"></div></div>
+
+<div id="domainMenu">
+<div id="selector">
+<div class="row search">
+<input type="text" onkeyup="backend('buildDomains','domainTarget',this.value);" style="width:250px;">&#9660;
+</div>
+<div id="domainTarget">
+
+</div>
+</div>
+</div>
+
+<div id="workarea">
+<div id="tabBar">
+
+</div>
+<div id="scrollyarea">
+
+<div style="position:relative; text-align:center; top:40%; color:#666666;">^ &nbsp; Please start a crawl or select an existing one to start &nbsp; ^</div>
+</div>
+</div>
+</body>
+</html>
